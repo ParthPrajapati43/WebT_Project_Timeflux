@@ -1,22 +1,21 @@
 import React, { useState } from "react";
 import { Button } from "@material-ui/core";
 import firebase from "firebase";
-import { storage, db } from "./firebase";
-import "./VideoUpload.css";
+import { storage, db, auth } from "./firebase";
 
-function VideoUpload({ username, ppurl }) {
-  const [video, setVideo] = useState(null);
+function PPUpload({ user }) {
+  const [image, setImage] = useState(null);
   const [progress, setProgress] = useState(0);
-  const [caption, setCaption] = useState("");
 
   const handleChange = (e) => {
     if (e.target.files[0]) {
-      setVideo(e.target.files[0]);
+      setImage(e.target.files[0]);
     }
   };
 
   const handleUpload = () => {
-    const uploadTask = storage.ref(`videos/${video.name}`).put(video);
+    const uploadTask = storage.ref(`images/${user.displayName}`).put(image);
+
     uploadTask.on(
       "state_changed",
       (snapshot) => {
@@ -34,40 +33,37 @@ function VideoUpload({ username, ppurl }) {
       () => {
         // complete function ...
         storage
-          .ref("videos")
-          .child(video.name)
+          .ref("images")
+          .child(user.displayName)
           .getDownloadURL()
           .then((url) => {
             // post video inside db
-            db.collection("posts").add({
-              timestamp: firebase.firestore.FieldValue.serverTimestamp(),
-              caption: caption,
-              imageUrl: url,
-              username: username,
-              ppurl: ppurl,
+            firebase.auth().currentUser.updateProfile({
+              photoURL: url,
             });
 
+            db.collection("users").add({
+              timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+              imageUrl: url,
+              uname: user.displayName,
+            });
+
+            //setOpenPP(false);
             setProgress(0);
-            setCaption("");
-            setVideo(null);
+            setImage(null);
           });
       }
     );
   };
 
   return (
-    <div className="videoupload">
-      <progress className="videoupload__progress" value={progress} max="100" />
-      <input
-        type="text"
-        placeholder="Enter a caption..."
-        onChange={(event) => setCaption(event.target.value)}
-        value={caption}
-      />
+    <div className="PPupload">
+      <h1>Upload a Profile Picture</h1>
+      <progress className="PPupload__progress" value={progress} max="100" />
       <input type="file" onChange={handleChange} />
       <Button onClick={handleUpload}>Upload</Button>
     </div>
   );
 }
 
-export default VideoUpload;
+export default PPUpload;
