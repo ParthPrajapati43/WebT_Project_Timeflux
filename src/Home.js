@@ -1,14 +1,27 @@
 import React, { useState, useEffect } from "react";
 import { storage, db, auth } from "./firebase";
 import { Link } from "react-router-dom";
-import "./App.css";
 import Post from "./Post";
 import logo from "./images/Timeflux_1Line.png";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import {
+  faEnvelope,
+  faKey,
+  faUser,
+  faUpload,
+  faSignInAlt,
+  faSignOutAlt,
+  faUserPlus,
+} from "@fortawesome/free-solid-svg-icons";
+
 import { makeStyles } from "@material-ui/core/styles";
 import Modal from "@material-ui/core/Modal";
-import { Button, Input } from "@material-ui/core";
+import Avatar from "@material-ui/core/Avatar";
+import { Button, Input, TextField } from "@material-ui/core";
 import VideoUpload from "./videoUpload";
+import Profile from "./Profile";
 import firebase from "firebase";
+import "./App.css";
 
 function Home() {
   function getModalStyle() {
@@ -37,6 +50,7 @@ function Home() {
   const [modalStyle] = useState(getModalStyle);
   const [posts, setPosts] = useState([]);
   const [open, setOpen] = useState(false);
+  const [profilePage, setProfilePage] = useState(false);
   const [openSignIn, setOpenSignIn] = useState(false);
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
@@ -49,15 +63,19 @@ function Home() {
   //const [openPP, setOpenPP] = useState(false);
   // UseEffect -> runs a piece of code based on a specific condition
 
+  const [navopen, setNavopen] = useState(false);
+
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged((authUser) => {
       if (authUser) {
         // user has logged in...
         console.log(authUser);
         setUser(authUser);
+        setNavopen(false);
       } else {
         // user has logged out...
         setUser(null);
+        setNavopen(false);
       }
     });
 
@@ -88,13 +106,38 @@ function Home() {
     auth
       .createUserWithEmailAndPassword(email, password)
       .then((authUser) => {
-        return authUser.user.updateProfile(
-          {
+        setUser(authUser.user);
+        if (authUser.user?.uid) {
+          alert("ok");
+          try {
+            console.log("happy coding");
+            db.collection("users")
+              .doc(authUser.user.uid)
+              .set({
+                FName: null,
+                LName: null,
+                Bio: null,
+              })
+              .then(() => {
+                console.log("Updated, Party Hard");
+              })
+              .catch((error) => {
+                alert(error.message);
+              });
+          } catch (error) {
+            alert(error.message);
+          }
+        } else {
+          alert("Not Okay");
+        }
+        return authUser.user
+          .updateProfile({
             displayName: username,
             photoURL: null,
-          },
-          setOpenPP(true)
-        );
+          })
+          .then(() => {
+            setOpenPP(true);
+          });
       })
       .catch((error) => alert(error.message));
 
@@ -102,7 +145,8 @@ function Home() {
     setPassword("");
     setUsername("");
     setOpen(false);
-    setOpenPP(true);
+    //setOpenPP(true);
+    setNavopen(false);
   };
 
   const signIn = (event) => {
@@ -116,6 +160,7 @@ function Home() {
     setPassword("");
     setUsername("");
     setOpenSignIn(false);
+    setNavopen(false);
   };
 
   const handleChange = (e) => {
@@ -180,25 +225,53 @@ function Home() {
                   alt="timeflux logo"
                 />
               </center>
-              <Input
-                placeholder="username"
-                type="text"
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
-              />
-              <Input
-                placeholder="email"
-                type="text"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-              />
-              <Input
-                placeholder="password"
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-              />
-              <Button type="submit" onClick={signUp}>
+              <br />
+              <div className="input-icons">
+                <FontAwesomeIcon className="icon" icon={faUser} />
+                <TextField
+                  className="input-field"
+                  type="text"
+                  value={username}
+                  id="outlined-basic"
+                  label="Username"
+                  variant="outlined"
+                  onChange={(e) => setUsername(e.target.value)}
+                />
+              </div>
+
+              <div className="input-icons">
+                <FontAwesomeIcon className="icon" icon={faEnvelope} />
+                <TextField
+                  className="input-field"
+                  type="text"
+                  value={email}
+                  id="outlined-basic"
+                  label="Email"
+                  variant="outlined"
+                  onChange={(e) => setEmail(e.target.value)}
+                />
+              </div>
+
+              <div className="input-icons">
+                <FontAwesomeIcon className="icon" icon={faKey} />
+                <TextField
+                  className="input-field"
+                  type="password"
+                  value={password}
+                  id="outlined-basic"
+                  label="Password"
+                  variant="outlined"
+                  onChange={(e) => setPassword(e.target.value)}
+                />
+              </div>
+
+              <Button
+                className="submit__button"
+                variant="contained"
+                color="primary"
+                type="submit"
+                onClick={signUp}
+              >
                 Sign Up
               </Button>
             </form>
@@ -215,76 +288,125 @@ function Home() {
                   alt="timeflux logo"
                 />
               </center>
-              <Input
-                placeholder="email"
-                type="text"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-              />
-              <Input
-                placeholder="password"
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-              />
-              <Button type="submit" onClick={signIn}>
+              <br />
+
+              <div className="input-icons">
+                <FontAwesomeIcon className="icon" icon={faEnvelope} />
+                <TextField
+                  className="input-field"
+                  type="text"
+                  value={email}
+                  id="outlined-basic"
+                  label="Email"
+                  variant="outlined"
+                  onChange={(e) => setEmail(e.target.value)}
+                />
+              </div>
+
+              <div className="input-icons">
+                <FontAwesomeIcon className="icon" icon={faKey} />
+                <TextField
+                  className="input-field"
+                  type="password"
+                  value={password}
+                  id="outlined-basic"
+                  label="Password"
+                  variant="outlined"
+                  onChange={(e) => setPassword(e.target.value)}
+                />
+              </div>
+
+              <Button
+                className="submit__button"
+                variant="contained"
+                color="primary"
+                type="submit"
+                onClick={signIn}
+              >
                 Sign In
               </Button>
             </form>
           </div>
         </Modal>
-        {
-          <Modal open={openPP} onClose={() => setOpenPP(false)}>
-            <div style={modalStyle} className={classes.paper}>
-              <div className="PPupload">
-                <h1>Upload a Profile Picture</h1>
-                <progress
-                  className="PPupload__progress"
-                  value={progress}
-                  max="100"
-                />
-                <input type="file" onChange={handleChange} />
-                <Button onClick={handleUpload}>Upload</Button>
-              </div>
-            </div>
-          </Modal>
-        }
 
-        <div className="app__header">
-          <img className="app__headerImage" src={logo} alt="Header image" />
-          {user ? (
-            <div>
-              <Button onClick={() => auth.signOut()}>Logout</Button>
-              <Link
-                to={{
-                  pathname: "/profile",
-                  data: [user],
+        <nav className="navbar">
+          <a href="#" onClick={() => setProfilePage(false)}>
+            <img className="app__headerImage" src={logo} alt="Header image" />
+          </a>
+          <a
+            className="avatar__button"
+            href="#"
+            onClick={() => setNavopen(!navopen)}
+          >
+            <Avatar
+              alt={user ? user.displayName : "User"}
+              src={user?.photoURL}
+            />
+          </a>
+          {navopen && user ? (
+            <div className="dropdown">
+              <a
+                href="#"
+                className="menu-item"
+                onClick={() => {
+                  setProfilePage(true);
+                  setNavopen(false);
                 }}
               >
-                {" "}
-                My Profile{" "}
-              </Link>
+                <FontAwesomeIcon className="icon" icon={faUser} />
+                MY PROFILE
+              </a>
+              <a
+                href="#"
+                className="menu-item"
+                onClick={() => {
+                  setProfilePage(false);
+                  auth.signOut();
+                }}
+              >
+                <FontAwesomeIcon className="icon" icon={faSignOutAlt} />
+                LOGOUT
+              </a>
             </div>
           ) : (
-            <div className="app__loginContainer">
-              <Button onClick={() => setOpenSignIn(true)}>Sign In</Button>
-              <Button onClick={() => setOpen(true)}>Sign Up</Button>
-            </div>
+            <></>
           )}
-        </div>
+          {navopen && !user ? (
+            <div className="dropdown">
+              <a href="#" className="menu-item" onClick={() => setOpen(true)}>
+                <FontAwesomeIcon className="icon" icon={faUserPlus} />
+                SIGN UP
+              </a>
+              <a
+                href="#"
+                className="menu-item"
+                onClick={() => setOpenSignIn(true)}
+              >
+                <FontAwesomeIcon className="icon" icon={faSignInAlt} />
+                SIGN IN
+              </a>
+            </div>
+          ) : (
+            <></>
+          )}
+        </nav>
 
         <div className="app__posts">
-          {posts.map(({ id, post }) => (
-            <Post
-              key={id}
-              postId={id}
-              user={user}
-              username={post.username}
-              caption={post.caption}
-              imageUrl={post.imageUrl}
-              ppurl={post.ppurl}
-            />
-          ))}
+          {profilePage ? (
+            <Profile />
+          ) : (
+            posts.map(({ id, post }) => (
+              <Post
+                key={id}
+                postId={id}
+                user={user}
+                username={post.username}
+                caption={post.caption}
+                imageUrl={post.imageUrl}
+                ppurl={post.ppurl}
+              />
+            ))
+          )}
         </div>
 
         {user ? (
@@ -294,9 +416,6 @@ function Home() {
           </div>
         ) : (
           <div className="post__noUpload">
-            <h3 className="post__noUpload">
-              Sorry, You need to login to upload
-            </h3>
             <script>location.reload();</script>
           </div>
         )}

@@ -1,0 +1,116 @@
+.app__headerImage {
+  object-fit: contain;
+  height: 40px;
+  width: 150px;
+  padding-left: 20px;
+  padding-right: 20px;
+}
+
+.modal__header {
+  text-align: center;
+  margin-top: 10px;
+  margin-bottom: 20px;
+}
+
+.user__name {
+  display: flex;
+  align-items: center;
+}
+
+.user__name > h2 {
+  margin-left: 30px;
+}
+
+.user__details {
+  display: flex;
+  flex-direction: column;
+  margin-left: 40px;
+  margin-top: 10px;
+}
+
+.user__details__inner {
+  display: flex;
+  flex-direction: row;
+}
+
+.user__details__inner > a {
+  cursor: pointer;
+  color: #303f9f;
+}
+
+.user__post {
+  margin-left: 0px;
+  margin-right: 0px;
+}
+
+.PPupload__progress {
+  width: 100%;
+  padding-bottom: 20px;
+}
+
+.PP_buttons {
+  display: flex;
+  margin-top: 20px;
+  justify-content: center;
+}
+
+.PP_buttons > Button {
+  margin-left: 10px;
+  margin-right: 10px;
+}
+
+input[type="file"] {
+  display: none;
+}
+
+.file__text {
+  border: 1px solid #979797;
+  border-radius: 5px;
+  padding: 5px;
+  cursor: pointer;
+  justify-content: center;
+}
+
+hr {
+  margin: auto;
+  margin-top: 10px;
+  margin-bottom: 30px;
+  width: 95%;
+}
+
+.file__select {
+  display: flex;
+  margin-top: 2px;
+  flex-direction: row;
+  justify-content: space-between;
+}
+
+.submit__button {
+  width: 100px;
+  align-self: center;
+}
+
+.input-icons i {
+  position: absolute;
+}
+
+.input-icons {
+  width: 100%;
+  margin: 0px;
+  padding: 0px;
+  padding-bottom: 10px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.icon {
+  min-width: 30px;
+  padding: 5px;
+}
+
+.input-field {
+  width: 90%;
+  padding: 10px;
+  text-align: center;
+}

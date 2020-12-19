@@ -1,11 +1,26 @@
 import React, { useState, useEffect } from "react";
-import { useBetween } from "use-between";
-import { Link } from "react-router-dom";
 import { db, auth, storage } from "./firebase";
 import Avatar from "@material-ui/core/Avatar";
+import Badge from "@material-ui/core/Badge";
 import firebase from "firebase";
 import Post from "./Post";
-import { Button, makeStyles, Modal } from "@material-ui/core";
+import {
+  Button,
+  makeStyles,
+  withStyles,
+  Modal,
+  TextField,
+} from "@material-ui/core";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import {
+  faAddressCard,
+  faEdit,
+  faUpload,
+  faUser,
+} from "@fortawesome/free-solid-svg-icons";
+import FaEdit from "./images/FaEdit.png";
+import logo from "./images/Timeflux_1Line.png";
+import "./Profile.css";
 
 function Profile(props) {
   function getModalStyle() {
@@ -30,11 +45,29 @@ function Profile(props) {
     },
   }));
 
+  const SmallAvatar = withStyles((theme) => ({
+    root: {
+      width: 25,
+      height: 25,
+      border: `2px solid ${theme.palette.background.paper}`,
+    },
+  }))(Avatar);
+
+  const classess = useStyles();
   const [image, setImage] = useState(null);
   const [progress, setProgress] = useState(0);
   const classes = useStyles();
   const [modalStyle] = useState(getModalStyle);
   const [openPP, setOpenPP] = useState(false);
+  const [nameBox, setNameBox] = useState(false);
+  const [bioBox, setBioBox] = useState(false);
+
+  const [fname, setFname] = useState("");
+  const [showfname, SetShowfname] = useState("");
+  const [lname, setLname] = useState("");
+  const [showlname, SetShowlname] = useState("");
+  const [bio, setBio] = useState("");
+  const [showbio, setShowbio] = useState("");
 
   const [user, setUser] = useState(props.user);
   const [username, setUsername] = useState("");
@@ -46,11 +79,75 @@ function Profile(props) {
     user.updateProfile({
       photoURL: null,
     });
+
+    setOpenPP(false);
   };
 
   const ChangePP = (event) => {
     event.preventDefault();
     setOpenPP(true);
+  };
+
+  const testing = (event) => {
+    event.preventDefault();
+    setFname(showfname);
+    setLname(showlname);
+    setNameBox(true);
+  };
+
+  const tst = (event) => {
+    event.preventDefault();
+    setBio(showbio);
+    setBioBox(true);
+  };
+
+  const ChangeName = (event) => {
+    event.preventDefault();
+    console.log(user.uid);
+    alert("HEllo world");
+    try {
+      console.log("happy coding");
+      db.collection("users")
+        .doc(user?.uid)
+        .set({
+          FName: fname,
+          LName: lname,
+          Bio: bio,
+        })
+        .then(() => {
+          console.log("Updated, Party Hard");
+        })
+        .catch((error) => {
+          alert(error.message);
+        });
+    } catch (error) {
+      alert(error.message);
+    }
+    alert("Ok Google");
+    setNameBox(false);
+  };
+
+  const ChangeBio = (event) => {
+    event.preventDefault();
+    try {
+      console.log("happy coding");
+      db.collection("users")
+        .doc(user.uid)
+        .set({
+          FName: fname,
+          LName: lname,
+          Bio: bio,
+        })
+        .then(() => {
+          console.log("Updated, Party Hard");
+        })
+        .catch((error) => {
+          alert(error.message);
+        });
+    } catch (error) {
+      alert(error.message);
+    }
+    setBioBox(false);
   };
 
   const handleChange = (e) => {
@@ -88,12 +185,6 @@ function Profile(props) {
               photoURL: url,
             });
 
-            db.collection("users").add({
-              timestamp: firebase.firestore.FieldValue.serverTimestamp(),
-              imageUrl: url,
-              uname: user.displayName,
-            });
-
             setOpenPP(false);
             setProgress(0);
             setImage(null);
@@ -118,6 +209,18 @@ function Profile(props) {
   }, []);
 
   useEffect(() => {
+    if (user?.uid) {
+      db.collection("users")
+        .doc(user?.uid)
+        .onSnapshot((snapshot) => {
+          SetShowfname(snapshot.data()?.FName);
+          SetShowlname(snapshot.data()?.LName);
+          setShowbio(snapshot.data()?.Bio);
+          console.log(showfname);
+        });
+    }
+  });
+  useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged((authUser) => {
       if (authUser) {
         // user has logged in...
@@ -136,29 +239,180 @@ function Profile(props) {
   }, [user, username]);
   return (
     <div>
-      <Avatar className="post__avatar" alt="user avatar" src={user?.photoURL} />
-      <Button onClick={RemovePP}>Remove Profile Picture</Button>
-      <Button onClick={ChangePP}>Import New Profile Pic</Button>
-      {
-        <Modal open={openPP} onClose={() => setOpenPP(false)}>
-          <div style={modalStyle} className={classes.paper}>
-            <div className="PPupload">
-              <h1>Upload a Profile Picture</h1>
-              <progress
-                className="PPupload__progress"
-                value={progress}
-                max="100"
-              />
-              <input type="file" onChange={handleChange} />
-              <Button onClick={handleUpload}>Upload</Button>
+      <Modal open={openPP} onClose={() => setOpenPP(false)}>
+        <div style={modalStyle} className={classess.paper}>
+          <center>
+            <img className="app__headerImage" src={logo} alt="timeflux logo" />
+          </center>
+          <h2 className="modal__header">SET YOUR PROFILE PICTURE</h2>
+          <progress className="PPupload__progress" value={progress} max="100" />
+          <div className="file__select">
+            <div id="file__selectt">
+              <label>
+                <input type="file" onChange={handleChange} />
+                <span className="file__text">
+                  <span className="upoad-icon">
+                    <FontAwesomeIcon className="icon" icon={faUpload} />
+                  </span>
+                  {document.querySelector("#file__selectt input[type=file]")
+                    ?.files?.length > 0 ? (
+                    document.querySelector("#file__selectt input[type=file]")
+                      ?.files[0]?.name
+                  ) : (
+                    <span>Choose a file…</span>
+                  )}
+                </span>
+              </label>
             </div>
           </div>
-        </Modal>
-      }
-      <h3>{user?.displayName}</h3>
-      <div>
+
+          <div className="PP_buttons">
+            <Button
+              className="submit__button"
+              variant="contained"
+              color="primary"
+              type="submit"
+              onClick={handleUpload}
+            >
+              Upload
+            </Button>
+            <Button
+              className="submit__button"
+              variant="contained"
+              color="primary"
+              type="submit"
+              onClick={RemovePP}
+            >
+              Remove
+            </Button>
+          </div>
+        </div>
+      </Modal>
+
+      <Modal open={nameBox} onClose={() => setNameBox(false)}>
+        <div style={modalStyle} className={classess.paper}>
+          <center>
+            <img className="app__headerImage" src={logo} alt="timeflux logo" />
+          </center>
+          <h2 className="modal__header">SET YOUR NAME</h2>
+          <div className="input-icons">
+            <FontAwesomeIcon className="icon" icon={faUser} />
+            <TextField
+              className="input-field"
+              type="text"
+              value={fname}
+              id="outlined-basic"
+              label="First Name"
+              variant="outlined"
+              onChange={(e) => setFname(e.target.value)}
+            />
+          </div>
+          <div className="input-icons">
+            <FontAwesomeIcon className="icon" icon={faUser} />
+            <TextField
+              className="input-field"
+              type="text"
+              value={lname}
+              id="outlined-basic"
+              label="Last Name"
+              variant="outlined"
+              onChange={(e) => setLname(e.target.value)}
+            />
+          </div>
+          <div className="PP_buttons">
+            <Button
+              className="submit__button"
+              variant="contained"
+              color="primary"
+              type="submit"
+              onClick={ChangeName}
+            >
+              Update
+            </Button>
+          </div>
+        </div>
+      </Modal>
+
+      <Modal open={bioBox} onClose={() => setBioBox(false)}>
+        <div style={modalStyle} className={classess.paper}>
+          <center>
+            <img className="app__headerImage" src={logo} alt="timeflux logo" />
+          </center>
+          <h2 className="modal__header">SET YOUR SHORT BIOGRAPHY</h2>
+          <div className="input-icons">
+            <FontAwesomeIcon className="icon" icon={faAddressCard} />
+            <TextField
+              className="input-field"
+              type="text"
+              value={bio}
+              id="outlined-multiline-static"
+              label="Short Biography"
+              variant="outlined"
+              multiline
+              rows={4}
+              onChange={(e) => setBio(e.target.value)}
+            />
+          </div>
+          <div className="PP_buttons">
+            <Button
+              className="submit__button"
+              variant="contained"
+              color="primary"
+              type="submit"
+              onClick={ChangeBio}
+            >
+              Update
+            </Button>
+          </div>
+        </div>
+      </Modal>
+
+      <div className="user__name">
+        <Badge
+          overlap="circle"
+          anchorOrigin={{
+            vertical: "bottom",
+            horizontal: "right",
+          }}
+          badgeContent={
+            <a type="button" onClick={ChangePP} style={{ cursor: "pointer" }}>
+              <SmallAvatar alt="Edit" src={FaEdit} />
+            </a>
+          }
+        >
+          <Avatar
+            alt={user?.displayName}
+            src={user?.photoURL}
+            style={{
+              height: "70px",
+              width: "70px",
+              marginLeft: "40px",
+              marginTop: "20px",
+            }}
+          />
+        </Badge>
+        <h2>{user?.displayName}</h2>
+      </div>
+      <div className="user__details">
+        <div className="user__details__inner">
+          <h3>
+            {showfname} {showlname}
+          </h3>
+          <a type="button" onClick={testing}>
+            <FontAwesomeIcon className="icon" icon={faEdit} />
+          </a>
+        </div>
+        <div className="user__details__inner">
+          <h3>{showbio}</h3>
+          <a type="button" onClick={tst}>
+            <FontAwesomeIcon className="icon" icon={faEdit} />
+          </a>
+        </div>
+      </div>
+      <hr />
+      <div className="user__posts">
         {posts.map(({ id, post }) =>
-          user.displayName == post.username ? (
+          user.displayName === post.username ? (
             <Post
               key={id}
               postId={id}

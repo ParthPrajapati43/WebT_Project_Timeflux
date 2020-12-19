@@ -26,11 +26,13 @@
   object-fit: contain;
   height: 40px;
   width: 150px;
+  padding-left: 20px;
+  padding-right: 20px;
 }
 
 .app__signup {
   display: flex;
-  flex-direction: column;  
+  flex-direction: column;
 }
 
 .post__noUpload {
@@ -38,4 +40,131 @@
   bottom: 0;
   background-color: white;
   text-align: center;
+}
+
+:root {
+  --bg: white;
+  --bg-accent: #484a4d;
+  --text-color: #dadce1;
+  --nav-size: 60px;
+  --border: 1px solid lightgray;
+  --border-radius: 8px;
+  --speed: 500ms;
+}
+
+ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+a {
+  color: var(--text-color);
+  text-decoration: none;
+}
+
+.navbar {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  height: var(--nav-size);
+  background-color: var(--bg);
+  border-bottom: 1px solid lightgray;
+  object-fit: contain;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.navbar-nav {
+  max-width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.avatar__button {
+  --button-size: calc(var(--nav-size) * 0.7);
+  width: var(--button-size);
+  height: var(--button-size);
+  border-radius: 50%;
+  padding: 5px;
+  margin: 2px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.avatar__button:hover {
+  filter: brightness(1.2);
+  background-color: rgb(177, 177, 177);
+}
+
+.dropdown {
+  position: absolute;
+  right: 0;
+  top: 58px;
+  width: 150px;
+  background-color: rgb(230, 230, 230);
+  /* border: var(--border);
+  border-radius: var(--border-radius);
+  padding: 1rem; */
+  overflow: hidden;
+}
+
+.menu-item {
+  height: 30px;
+  color: black;
+  display: flex;
+  align-items: center;
+  transition: background var(--speed);
+  padding: 0.5rem;
+}
+
+.menu-item:hover {
+  background-color: rgb(189, 189, 189);
+}
+
+.profile {
+  margin: 0px;
+  padding: 0px;
+  border: 0px;
+}
+
+.input-icons i {
+  position: absolute;
+}
+
+.input-icons {
+  width: 100%;
+  margin: 0px;
+  padding: 0px;
+  padding-bottom: 10px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.icon {
+  min-width: 30px;
+  padding: 5px;
+}
+
+.input-field {
+  width: 90%;
+  padding: 10px;
+  text-align: center;
+}
+
+.submit__button {
+  width: 100px;
+  align-self: center;
+}
+
+.custom-file-upload {
+  border: 1px solid #ccc;
+  display: flex;
+  padding: 6px 12px;
+  cursor: pointer;
+  width: 200px;
 }
