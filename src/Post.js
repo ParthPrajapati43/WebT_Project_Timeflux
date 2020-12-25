@@ -3,7 +3,9 @@ import "./Post.css";
 import Avatar from "@material-ui/core/Avatar";
 import { db } from "./firebase";
 import firebase from "firebase";
-import { Button } from "@material-ui/core";
+import { Button, TextField } from "@material-ui/core";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faPaperPlane, faTrashAlt } from "@fortawesome/free-solid-svg-icons";
 
 function Post({ postId, user, username, caption, imageUrl, ppurl }) {
   const [comments, setComments] = useState([]);
@@ -54,7 +56,9 @@ function Post({ postId, user, username, caption, imageUrl, ppurl }) {
         <h3>{username}</h3>
         {user?.displayName == username ? (
           <div className="post__delete">
-            <Button onClick={deletePost}>Delete Post</Button>
+            <Button onClick={deletePost}>
+              <FontAwesomeIcon className="icon" icon={faTrashAlt} />
+            </Button>
           </div>
         ) : (
           <div></div>
@@ -68,7 +72,7 @@ function Post({ postId, user, username, caption, imageUrl, ppurl }) {
       <h4 className="post__text">
         <strong>{username}</strong>: {caption}
       </h4>
-
+      <hr />
       <div className="post__comments">
         {comments.map((comment) => (
           <p>
@@ -90,11 +94,15 @@ function Post({ postId, user, username, caption, imageUrl, ppurl }) {
 
       {user && (
         <form className="post__commentBox">
-          <input
+          <TextField
             className="post__input"
+            size="small"
             type="text"
-            placeholder="Add a comment..."
             value={comment}
+            id="outlined-basic"
+            label="Enter Comment"
+            variant="outlined"
+            fullWidth={true}
             onChange={(e) => setComment(e.target.value)}
           />
           <button
@@ -103,7 +111,11 @@ function Post({ postId, user, username, caption, imageUrl, ppurl }) {
             type="submit"
             onClick={postComment}
           >
-            Post
+            <FontAwesomeIcon
+              className="icon"
+              icon={faPaperPlane}
+              style={{ cursor: "pointer", color: "black" }}
+            />
           </button>
         </form>
       )}

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { db, auth, storage } from "./firebase";
+import { Link } from "react-router-dom";
 import Avatar from "@material-ui/core/Avatar";
 import Badge from "@material-ui/core/Badge";
 import firebase from "firebase";
@@ -17,6 +18,8 @@ import {
   faEdit,
   faUpload,
   faUser,
+  faSignOutAlt,
+  faHome,
 } from "@fortawesome/free-solid-svg-icons";
 import FaEdit from "./images/FaEdit.png";
 import logo from "./images/Timeflux_1Line.png";
@@ -56,7 +59,7 @@ function Profile(props) {
   const classess = useStyles();
   const [image, setImage] = useState(null);
   const [progress, setProgress] = useState(0);
-  const classes = useStyles();
+
   const [modalStyle] = useState(getModalStyle);
   const [openPP, setOpenPP] = useState(false);
   const [nameBox, setNameBox] = useState(false);
@@ -73,12 +76,38 @@ function Profile(props) {
   const [username, setUsername] = useState("");
   const [posts, setPosts] = useState([]);
 
+  const [ppurl, setPpurl] = useState("");
+
+  const [navopen, setNavopen] = useState(false);
+
   const RemovePP = (event) => {
     event.preventDefault();
 
     user.updateProfile({
       photoURL: null,
     });
+    db.collection("users")
+      .doc(user?.uid)
+      .update({
+        photoURL: null,
+      })
+      .then(() => {
+        console.log("Updated, Party Hard");
+      })
+      .catch((error) => {
+        alert(error.message);
+      });
+    db.collection("posts")
+      .where("username", "==", user.displayName)
+      .get()
+      .then(function (querySnapshot) {
+        querySnapshot.forEach((doc) => {
+          db.collection("posts").doc(doc.id).update({
+            ppurl: null,
+          });
+        });
+      })
+      .catch((error) => alert(error.message));
 
     setOpenPP(false);
   };
@@ -104,15 +133,14 @@ function Profile(props) {
   const ChangeName = (event) => {
     event.preventDefault();
     console.log(user.uid);
-    alert("HEllo world");
+    //alert("HEllo world");
     try {
       console.log("happy coding");
       db.collection("users")
         .doc(user?.uid)
-        .set({
+        .update({
           FName: fname,
           LName: lname,
-          Bio: bio,
         })
         .then(() => {
           console.log("Updated, Party Hard");
@@ -123,7 +151,7 @@ function Profile(props) {
     } catch (error) {
       alert(error.message);
     }
-    alert("Ok Google");
+    //alert("Ok Google");
     setNameBox(false);
   };
 
@@ -133,9 +161,7 @@ function Profile(props) {
       console.log("happy coding");
       db.collection("users")
         .doc(user.uid)
-        .set({
-          FName: fname,
-          LName: lname,
+        .update({
           Bio: bio,
         })
         .then(() => {
@@ -184,7 +210,28 @@ function Profile(props) {
             firebase.auth().currentUser.updateProfile({
               photoURL: url,
             });
-
+            db.collection("users")
+              .doc(user?.uid)
+              .update({
+                photoURL: url,
+              })
+              .then(() => {
+                console.log("Updated, Party Hard");
+              })
+              .catch((error) => {
+                alert(error.message);
+              });
+            db.collection("posts")
+              .where("username", "==", user.displayName)
+              .get()
+              .then(function (querySnapshot) {
+                querySnapshot.forEach((doc) => {
+                  db.collection("posts").doc(doc.id).update({
+                    ppurl: url,
+                  });
+                });
+              })
+              .catch((error) => alert(error.message));
             setOpenPP(false);
             setProgress(0);
             setImage(null);
@@ -216,7 +263,8 @@ function Profile(props) {
           SetShowfname(snapshot.data()?.FName);
           SetShowlname(snapshot.data()?.LName);
           setShowbio(snapshot.data()?.Bio);
-          console.log(showfname);
+          setPpurl(snapshot.data()?.photoURL);
+          //console.log(ppurl);
         });
     }
   });
@@ -366,53 +414,98 @@ function Profile(props) {
           </div>
         </div>
       </Modal>
+      <div className="profile__header">
+        <nav className="navbar">
+          <img className="app__headerImage" src={logo} alt="Header image" />
+          <a
+            className="avatar__button"
+            href="#"
+            onClick={() => setNavopen(!navopen)}
+          >
+            <Avatar alt={user ? user.displayName : "User"} src={ppurl} />
+          </a>
+          {navopen && user ? (
+            <div className="dropdown">
+              <a href="#" className="menu-item">
+                <Link
+                  className="menu-item profile"
+                  to={{
+                    pathname: "/Home",
+                    data: [user],
+                  }}
+                >
+                  {" "}
+                  <FontAwesomeIcon className="icon" icon={faHome} />
+                  HOME{" "}
+                </Link>
+              </a>
+              <a href="#" className="menu-item" onClick={() => auth.signOut()}>
+                <Link
+                  className="menu-item profile"
+                  to={{
+                    pathname: "/Home",
+                    data: [user],
+                  }}
+                >
+                  {" "}
+                  <FontAwesomeIcon className="icon" icon={faSignOutAlt} />
+                  LOGOUT{" "}
+                </Link>
+              </a>
+            </div>
+          ) : (
+            <></>
+          )}
+        </nav>
 
-      <div className="user__name">
-        <Badge
-          overlap="circle"
-          anchorOrigin={{
-            vertical: "bottom",
-            horizontal: "right",
-          }}
-          badgeContent={
-            <a type="button" onClick={ChangePP} style={{ cursor: "pointer" }}>
-              <SmallAvatar alt="Edit" src={FaEdit} />
-            </a>
-          }
-        >
-          <Avatar
-            alt={user?.displayName}
-            src={user?.photoURL}
-            style={{
-              height: "70px",
-              width: "70px",
-              marginLeft: "40px",
-              marginTop: "20px",
+        <div className="user__name">
+          <Badge
+            overlap="circle"
+            anchorOrigin={{
+              vertical: "bottom",
+              horizontal: "right",
             }}
-          />
-        </Badge>
-        <h2>{user?.displayName}</h2>
-      </div>
-      <div className="user__details">
-        <div className="user__details__inner">
-          <h3>
-            {showfname} {showlname}
-          </h3>
-          <a type="button" onClick={testing}>
-            <FontAwesomeIcon className="icon" icon={faEdit} />
-          </a>
+            badgeContent={
+              <a type="button" onClick={ChangePP} style={{ cursor: "pointer" }}>
+                <SmallAvatar alt="Edit" src={FaEdit} />
+              </a>
+            }
+          >
+            <Avatar
+              alt={user?.displayName}
+              src={ppurl}
+              style={{
+                height: "70px",
+                width: "70px",
+                marginLeft: "40px",
+                marginTop: "20px",
+              }}
+            />
+          </Badge>
+          <h2>{user?.displayName}</h2>
         </div>
-        <div className="user__details__inner">
-          <h3>{showbio}</h3>
-          <a type="button" onClick={tst}>
-            <FontAwesomeIcon className="icon" icon={faEdit} />
-          </a>
+        <div className="user__details">
+          <div className="user__details__inner">
+            <h3>
+              {showfname} {showlname}
+            </h3>
+            <a type="button" onClick={testing}>
+              <FontAwesomeIcon className="icon" icon={faEdit} />
+            </a>
+          </div>
+          <div className="user__details__inner">
+            <h3>{showbio}</h3>
+            <a type="button" onClick={tst}>
+              <FontAwesomeIcon className="icon" icon={faEdit} />
+            </a>
+          </div>
         </div>
       </div>
       <hr />
+
       <div className="user__posts">
         {posts.map(({ id, post }) =>
-          user.displayName === post.username ? (
+          user?.displayName === post.username ? (
             <Post
               key={id}
               postId={id}
@@ -420,7 +513,7 @@ function Profile(props) {
               username={post.username}
               caption={post.caption}
               imageUrl={post.imageUrl}
-              ppurl={post.ppurl}
+              ppurl={ppurl}
             />
           ) : (
             <div></div>

@@ -66,7 +66,7 @@ a {
 .navbar {
   position: sticky;
   top: 0;
-  z-index: 1;
+  z-index: 10;
   height: var(--nav-size);
   background-color: var(--bg);
   border-bottom: 1px solid lightgray;
@@ -123,6 +123,12 @@ a {
 
 .menu-item:hover {
   background-color: rgb(189, 189, 189);
+}
+
+.modal__header {
+  text-align: center;
+  margin-top: 10px;
+  margin-bottom: 20px;
 }
 
 .profile {

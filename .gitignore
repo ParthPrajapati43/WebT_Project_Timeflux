@@ -21,3 +21,10 @@
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+
+# videos
+/src/videos/MiamiBayTL.mp4
+/src/videos/NatureTL.mp4
+/src/videos/RedBloodMoonTL.mp4
+/src/videos/VideoSharing.mp4
+/src/videos/Yellow_Paint.mp4

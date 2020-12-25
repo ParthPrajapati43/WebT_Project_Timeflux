@@ -20,6 +20,7 @@ import Avatar from "@material-ui/core/Avatar";
 import { Button, Input, TextField } from "@material-ui/core";
 import VideoUpload from "./videoUpload";
 import Profile from "./Profile";
+import Info from "./Info";
 import firebase from "firebase";
 import "./App.css";
 
@@ -50,7 +51,6 @@ function Home() {
   const [modalStyle] = useState(getModalStyle);
   const [posts, setPosts] = useState([]);
   const [open, setOpen] = useState(false);
-  const [profilePage, setProfilePage] = useState(false);
   const [openSignIn, setOpenSignIn] = useState(false);
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
@@ -86,6 +86,13 @@ function Home() {
   }, [user, username]);
 
   useEffect(() => {
+    document.title = "TimeFlux";
+    return () => {
+      //cleanup
+    };
+  }, []);
+
+  useEffect(() => {
     // code
     db.collection("posts")
       .orderBy("timestamp", "desc")
@@ -108,18 +115,20 @@ function Home() {
       .then((authUser) => {
         setUser(authUser.user);
         if (authUser.user?.uid) {
-          alert("ok");
+          //alert("ok");
           try {
             console.log("happy coding");
             db.collection("users")
               .doc(authUser.user.uid)
               .set({
+                uname: username,
                 FName: null,
                 LName: null,
                 Bio: null,
+                photoURL: null,
               })
               .then(() => {
-                console.log("Updated, Party Hard");
+                //console.log("Updated, Party Hard");
               })
               .catch((error) => {
                 alert(error.message);
@@ -128,7 +137,7 @@ function Home() {
             alert(error.message);
           }
         } else {
-          alert("Not Okay");
+          //alert("Not Okay");
         }
         return authUser.user
           .updateProfile({
@@ -163,55 +172,6 @@ function Home() {
     setNavopen(false);
   };
 
-  const handleChange = (e) => {
-    if (e.target.files[0]) {
-      setImage(e.target.files[0]);
-    }
-  };
-
-  const handleUpload = () => {
-    const uploadTask = storage.ref(`images/${user.displayName}`).put(image);
-
-    uploadTask.on(
-      "state_changed",
-      (snapshot) => {
-        // progress funtion ...
-        const progress = Math.round(
-          (snapshot.bytesTransferred / snapshot.totalBytes) * 100
-        );
-        setProgress(progress);
-      },
-      (error) => {
-        // error function ...
-        console.log(error);
-        alert(error.message);
-      },
-      () => {
-        // complete function ...
-        storage
-          .ref("images")
-          .child(user.displayName)
-          .getDownloadURL()
-          .then((url) => {
-            // post video inside db
-            firebase.auth().currentUser.updateProfile({
-              photoURL: url,
-            });
-
-            db.collection("users").add({
-              timestamp: firebase.firestore.FieldValue.serverTimestamp(),
-              imageUrl: url,
-              uname: user.displayName,
-            });
-
-            setOpenPP(false);
-            setProgress(0);
-            setImage(null);
-          });
-      }
-    );
-  };
-
   return (
     <div>
       <div className="app">
@@ -225,7 +185,7 @@ function Home() {
                   alt="timeflux logo"
                 />
               </center>
-              <br />
+              <h2 className="modal__header">SIGN UP</h2>
               <div className="input-icons">
                 <FontAwesomeIcon className="icon" icon={faUser} />
                 <TextField
@@ -270,7 +230,27 @@ function Home() {
                 variant="contained"
                 color="primary"
                 type="submit"
-                onClick={signUp}
+                onClick={
+                  signUp /* (event) => {
+                  (async () => {
+                    const snapshot = await db
+                      .collection("users")
+                      .where("uname", "==", username)
+                      .get();
+                    if (snapshot.empty) {
+                      //alert("signup triggered!");
+                      signUp(event);
+                    } else {
+                      alert("Username already taken");
+                      setEmail("");
+                      setPassword("");
+                      setUsername("");
+                      setOpen(false);
+                      setNavopen(false);
+                    }
+                  })();
+                } */
+                }
               >
                 Sign Up
               </Button>
@@ -288,7 +268,7 @@ function Home() {
                   alt="timeflux logo"
                 />
               </center>
-              <br />
+              <h2 className="modal__header">SIGN IN</h2>
 
               <div className="input-icons">
                 <FontAwesomeIcon className="icon" icon={faEnvelope} />
@@ -330,7 +310,7 @@ function Home() {
         </Modal>
 
         <nav className="navbar">
-          <a href="#" onClick={() => setProfilePage(false)}>
+          <a href="#">
             <img className="app__headerImage" src={logo} alt="Header image" />
           </a>
           <a
@@ -349,23 +329,37 @@ function Home() {
                 href="#"
                 className="menu-item"
                 onClick={() => {
-                  setProfilePage(true);
                   setNavopen(false);
                 }}
               >
-                <FontAwesomeIcon className="icon" icon={faUser} />
-                MY PROFILE
+                <Link
+                  className="menu-item profile"
+                  to={{
+                    pathname: "/Profile",
+                    data: [user],
+                  }}
+                >
+                  <FontAwesomeIcon className="icon" icon={faUser} />
+                  MY PROFILE
+                </Link>
               </a>
               <a
                 href="#"
                 className="menu-item"
                 onClick={() => {
-                  setProfilePage(false);
                   auth.signOut();
                 }}
               >
-                <FontAwesomeIcon className="icon" icon={faSignOutAlt} />
-                LOGOUT
+                <Link
+                  className="menu-item profile"
+                  to={{
+                    pathname: "/Home",
+                    data: [user],
+                  }}
+                >
+                  <FontAwesomeIcon className="icon" icon={faSignOutAlt} />
+                  LOGOUT
+                </Link>
               </a>
             </div>
           ) : (
@@ -392,8 +386,8 @@ function Home() {
         </nav>
 
         <div className="app__posts">
-          {profilePage ? (
-            <Profile />
+          {!user ? (
+            <Info />
           ) : (
             posts.map(({ id, post }) => (
               <Post

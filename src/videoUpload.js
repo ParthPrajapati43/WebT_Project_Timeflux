@@ -6,7 +6,8 @@ import { TextField } from "@material-ui/core";
 import Modal from "@material-ui/core/Modal";
 import { makeStyles } from "@material-ui/core/styles";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faPlusCircle, faUpload } from "@fortawesome/free-solid-svg-icons";
+import logo from "./images/Timeflux_1Line.png";
+import { faUpload } from "@fortawesome/free-solid-svg-icons";
 import "./VideoUpload.css";
 
 function VideoUpload({ username, ppurl }) {
@@ -90,6 +91,10 @@ function VideoUpload({ username, ppurl }) {
     <div className="videoupload">
       <Modal open={openUpload} onClose={() => setOpenUpload(false)}>
         <div style={modalStyle} className={classess.paper}>
+          <center>
+            <img className="app__headerImage" src={logo} alt="timeflux logo" />
+          </center>
+          <h2 className="modal__header">UPLOAD A VIDEO</h2>
           <progress
             className="videoupload__progress"
             value={progress}

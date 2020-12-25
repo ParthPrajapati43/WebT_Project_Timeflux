@@ -6,6 +6,20 @@
   padding-right: 10px;
 }
 
+.app__headerImage {
+  object-fit: contain;
+  height: 40px;
+  width: 150px;
+  padding-left: 20px;
+  padding-right: 20px;
+}
+
+.modal__header {
+  text-align: center;
+  margin-top: 10px;
+  margin-bottom: 20px;
+}
+
 .videoupload__progress {
   width: 100%;
   padding-bottom: 20px;
